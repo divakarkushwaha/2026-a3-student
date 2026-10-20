@@ -34,6 +34,8 @@ def main():
     ap.add_argument("--patience", type=int, default=3)
     ap.add_argument("--hidden", type=int, nargs="+", default=[64],
                     help="hidden layer widths, e.g. --hidden 128 64 (at most 3 layers of at most 256 units)")
+    ap.add_argument("--weighted", action="store_true", help="Track P: gap-favouring pair sampling + weighted RankNet (pairwise only)")
+    ap.add_argument("--weight-decay", type=float, default=0.0)
     args = ap.parse_args()
     train = stack(read_svmlight_ltr(_resolve(args.train, "train.txt")))
     dev = stack(read_svmlight_ltr(_resolve(args.dev, "vali.txt")))
@@ -41,7 +43,8 @@ def main():
     for kind in (["pointwise", "pairwise"] if args.kind == "both" else [args.kind]):
         net, std, hist = train_model(kind, train, dev, seed=args.seed, epochs=args.epochs, batch_size=args.batch_size,
                                      lr=args.lr, pairs_per_query=args.pairs_per_query, patience=args.patience,
-                                     hidden=args.hidden, verbose=True)
+                                     hidden=args.hidden, verbose=True,
+                                     weighted=(args.weighted and kind == "pairwise"), weight_decay=args.weight_decay)
         path = os.path.join(args.out_dir, f"{kind}_model.pt")
         save_scorer(path, net, std, args.hidden)
         print(f"{kind}: epochs run = {len(hist)}, final dev nDCG@10 = {dev_ndcg(make_scorer(net, std), *dev):.4f} -> {path}")
