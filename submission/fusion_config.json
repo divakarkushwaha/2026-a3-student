@@ -1,0 +1,10 @@
+{
+  "method": "combmnz",
+  "c": null,
+  "weights": {
+    "bm25_whole_document": 2.0,
+    "bm25_title": 1.0,
+    "lmir_dir_whole_document": 1.0,
+    "lmir_jm_whole_document": 0.0
+  }
+}
